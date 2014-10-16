@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2001-2014, Parrot Foundation.
+Copyright (C) 2001-2017, Parrot Foundation.
 
 =head1 NAME
 
@@ -1046,7 +1046,7 @@ Parrot_str_length(SHIM_INTERP, ARGIN_NULLOK(const STRING *s))
 {
     ASSERT_ARGS(Parrot_str_length)
 
-    return STRING_IS_NULL(s) ? 0 : s->strlen;
+    return !s ? 0 : s->strlen;
 }
 
 
@@ -1519,10 +1519,10 @@ Parrot_str_bitwise_and(PARROT_INTERP, ARGIN_NULLOK(const STRING *s1),
             nonnull_encoding_name(s1), s2->encoding->name);
 
     /* think about case of dest string is one of the operands */
-    if (!STRING_IS_NULL(s1) && !STRING_IS_NULL(s2))
-        minlen = s1->strlen > s2->strlen ? s2->strlen : s1->strlen;
-    else
-        minlen = 0;
+    /* if (!STRING_IS_NULL(s1) && !STRING_IS_NULL(s2)) */
+    minlen = s1->strlen > s2->strlen ? s2->strlen : s1->strlen;
+    /* else
+       minlen = 0; */
 
     res = Parrot_str_new_init(interp, NULL, minlen,
             Parrot_binary_encoding_ptr, 0);
@@ -1530,7 +1530,6 @@ Parrot_str_bitwise_and(PARROT_INTERP, ARGIN_NULLOK(const STRING *s1),
     if (STRING_IS_NULL(s1) || STRING_IS_NULL(s2)) {
         res->bufused = 0;
         res->strlen  = 0;
-
         return res;
     }
 
@@ -3258,7 +3257,7 @@ Parrot_str_split(PARROT_INTERP,
     UINTVAL  slen, dlen;
     String_iter iter;
 
-    if (STRING_IS_NULL(delim) || STRING_IS_NULL(str))
+    if (STRING_IS_NULL(str))
         return PMCNULL;
 
     res  = Parrot_pmc_new(interp,
